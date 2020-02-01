@@ -5,25 +5,27 @@ import requests
 import _thread
 
 #initialising
-current_price = 0
+starttime = time.time()
+global_current_value = ""
 
 bought_items = 0
 buy_price = 0
 
 low_buyprice = 0
-
+last_measured = 0
 list=[]
 
 pre_average1 = 0
 
 #defines
-def collecting_current_data():
-    global current_price
+def collecting_current_data(finance_yahoo_link):
+    global global_current_value
     while 1:
-        responce = requests.get("https://finance.yahoo.com/quote/TSLA?p=TSLA")
+        responce = requests.get(finance_yahoo_link)
         if "Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px)" in responce.content.decode():
             current_price = responce.content.decode().split("Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px)")[1].split(">")[1].split("<")[0]
-            print(current_price)
+            global_current_value = finance_yahoo_link.split("=")[1], ": ", current_price
+
 
 def average(list):
     sum=0
@@ -36,14 +38,14 @@ def average(list):
 
 
 #websites used for testing
-#https://finance.yahoo.com/quote/TSLA?p=TSLA
+link1 = "https://finance.yahoo.com/quote/TSLA?p=TSLA"   #Tesla
 
+linkCode1 = link1.split("=")[1]
 #main
-_thread.start_new_thread(collecting_current_data, ())
-
+_thread.start_new_thread(collecting_current_data, (link1,))
 while 1:
     CurrentTime=datetime.now().replace(microsecond=0)
-    last_measured= int(input("geef een getal: "))
+    #last_measured= int(input("geef een getal: "))
 
     #collecting external data
 
@@ -58,18 +60,10 @@ while 1:
     else:
         profit = False
 
-    pre_average1 = average(list)
+    if time.time()-starttime > 1:
+        if len(global_current_value) == 3:
+            print(global_current_value[2])
+        else:
+            print("global_current_value isn't filled in yet")
 
-    #selling
-    if profit:
-        print("sell")
-
-    #buying
-    if current_price < low_point:
-        pass
-
-
-
-    #testprints
-    print(list)
-    print(average(list))
+        starttime = time.time()
