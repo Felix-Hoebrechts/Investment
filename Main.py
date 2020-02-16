@@ -1,12 +1,13 @@
-#imports
-from datetime import datetime
+# imports
+from datetime import datetime, timezone
+import pytz
 import time
 import requests
 import _thread
 
-#initialising
+# initialising
 starttime = time.time()
-global_current_value = ""
+global_current_value = ["","",""]
 
 bought_items = 0
 buy_price = 0
@@ -17,7 +18,7 @@ list=[]
 
 pre_average1 = 0
 
-#defines
+# defines
 def collecting_current_data(finance_yahoo_link):
     global global_current_value
     while 1:
@@ -27,43 +28,24 @@ def collecting_current_data(finance_yahoo_link):
             global_current_value = finance_yahoo_link.split("=")[1], ": ", current_price
 
 
-def average(list):
-    sum=0
-    teller=0
-    for i in list:
-        sum+=i
-        teller+=1
-    gemiddelde = sum/teller
-    return gemiddelde
-
-
-#websites used for testing
+# websites used for testing
 link1 = "https://finance.yahoo.com/quote/TSLA?p=TSLA"   #Tesla
 
 linkCode1 = link1.split("=")[1]
-#main
+# threads starting
 _thread.start_new_thread(collecting_current_data, (link1,))
+
+# main
 while 1:
-    CurrentTime=datetime.now().replace(microsecond=0)
-    #last_measured= int(input("geef een getal: "))
+    CurrentTime = datetime.now().replace(microsecond=0)
+    MarketTime = datetime.now(pytz.timezone('EST')).replace(microsecond=0, tzinfo=None)
+    print("Local time:", CurrentTime, "\t \t Market time:", MarketTime, "\t \t Value:", global_current_value[2])
 
-    #collecting external data
+    time.sleep(1)
 
-    #list construction
-    if len(list) >= 10:
-        del list[0]
-    list.append(last_measured)
+    # collecting external data
 
-    #predicting
-    if buy_price < pre_average1:
-        profit = True
-    else:
-        profit = False
+    # list construction
 
-    if time.time()-starttime > 1:
-        if len(global_current_value) == 3:
-            print(global_current_value[2])
-        else:
-            print("global_current_value isn't filled in yet")
+    # predicting
 
-        starttime = time.time()
